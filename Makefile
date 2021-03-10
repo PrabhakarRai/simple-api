@@ -7,6 +7,9 @@ createdb:
 dropdb:
 	docker exec -it postgres13 dropdb simple_api
 
+migratecreate:
+	migrate create -ext sql -dir db/migration -seq init_schema
+
 migrateup:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_api?sslmode=disable" -verbose up
 
@@ -31,4 +34,4 @@ test:
 server:
 	go run main.go
 
-.PHONY: postgres psql createdb dropdb migrateup migrateup1 migratedown migratedown1 sqlc test server
+.PHONY: postgres psql createdb dropdb migratecreate migrateup migrateup1 migratedown migratedown1 sqlc test server
