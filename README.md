@@ -1,2 +1,2 @@
-# simple-file-management
-Simple Physical File Management System in Golang
+# simple-api
+Simple API for key value storage in Golang
