@@ -69,6 +69,5 @@ func TestDeleteStorageItemsByUserID(t *testing.T) {
 	err := testQueries.DeleteStorageItemsByUserID(context.Background(), data.CreatedBy)
 	require.NoError(t, err)
 	result, err := testQueries.GetStorageItemsByUserID(context.Background(), data.CreatedBy)
-	require.Error(t, err)
 	require.Empty(t, result)
 }

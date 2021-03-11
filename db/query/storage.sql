@@ -11,7 +11,7 @@ WHERE created_by = $1;
 
 -- name: GetStorageItemsByUsername :many
 SELECT (id, key) FROM storage
-WHERE by = (SELECT id FROM users WHERE users.username = $1 LIMIT 1);
+WHERE created_by = (SELECT id FROM users WHERE users.username = $1 LIMIT 1);
 
 -- name: DeleteStorageItemByKey :exec
 DELETE FROM storage WHERE key = $1;
