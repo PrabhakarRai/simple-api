@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS storage_usages;
 DROP TABLE IF EXISTS storage;
 DROP TABLE IF EXISTS api_keys;
 DROP TABLE IF EXISTS users;
