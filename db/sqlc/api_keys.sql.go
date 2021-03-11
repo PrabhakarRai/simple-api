@@ -23,6 +23,15 @@ func (q *Queries) CreateAPIKey(ctx context.Context, arg CreateAPIKeyParams) (int
 	return id, err
 }
 
+const deleteAPIKeyByAPIKey = `-- name: DeleteAPIKeyByAPIKey :exec
+DELETE FROM api_keys WHERE key = $1
+`
+
+func (q *Queries) DeleteAPIKeyByAPIKey(ctx context.Context, key string) error {
+	_, err := q.db.ExecContext(ctx, deleteAPIKeyByAPIKey, key)
+	return err
+}
+
 const deleteAPIKeysByUserID = `-- name: DeleteAPIKeysByUserID :exec
 DELETE FROM api_keys WHERE owner = $1
 `
@@ -67,6 +76,25 @@ WHERE api_keys.owner = (SELECT id FROM users WHERE users.username = $1 LIMIT 1)
 
 func (q *Queries) GetAPIKeyByUsername(ctx context.Context, username string) (ApiKey, error) {
 	row := q.db.QueryRowContext(ctx, getAPIKeyByUsername, username)
+	var i ApiKey
+	err := row.Scan(
+		&i.ID,
+		&i.Key,
+		&i.Owner,
+		&i.Enabled,
+		&i.Hits,
+		&i.Errors,
+	)
+	return i, err
+}
+
+const getUserIDByAPIKey = `-- name: GetUserIDByAPIKey :one
+SELECT id, key, owner, enabled, hits, errors FROM api_keys
+WHERE owner = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserIDByAPIKey(ctx context.Context, owner int32) (ApiKey, error) {
+	row := q.db.QueryRowContext(ctx, getUserIDByAPIKey, owner)
 	var i ApiKey
 	err := row.Scan(
 		&i.ID,

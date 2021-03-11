@@ -98,7 +98,7 @@ func (q *Queries) GetStorageItemsByUserID(ctx context.Context, createdBy int32) 
 
 const getStorageItemsByUsername = `-- name: GetStorageItemsByUsername :many
 SELECT (id, key) FROM storage
-WHERE by = (SELECT id FROM users WHERE users.username = $1 LIMIT 1)
+WHERE created_by = (SELECT id FROM users WHERE users.username = $1 LIMIT 1)
 `
 
 func (q *Queries) GetStorageItemsByUsername(ctx context.Context, username string) ([]interface{}, error) {
