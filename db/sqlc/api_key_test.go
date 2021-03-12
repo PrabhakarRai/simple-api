@@ -56,7 +56,7 @@ func TestGetAPIKeyDetailsByKey(t *testing.T) {
 	require.Equal(t, res.ID, data.ID)
 	require.Equal(t, res.Key, data.Key)
 	require.Equal(t, res.Owner, data.Owner)
-	require.Equal(t, res.Enabled, true)
+	require.Equal(t, res.Enabled.Bool, true)
 	require.Equal(t, res.Hits, 0)
 	require.Equal(t, res.Errors, 0)
 }
@@ -96,7 +96,7 @@ func TestUpdateAPIKeyErrors(t *testing.T) {
 	res, err := testQueries.GetAPIKeyDetailsByKey(context.Background(), data.Key)
 	require.NoError(t, err)
 	require.NotEmpty(t, res)
-	require.Equal(t, res.Errors.Int32, 1)
+	require.Equal(t, res.Errors.Int32, int32(1))
 }
 
 func TestUpdateAPIKeyHits(t *testing.T) {
@@ -106,5 +106,5 @@ func TestUpdateAPIKeyHits(t *testing.T) {
 	res, err := testQueries.GetAPIKeyDetailsByKey(context.Background(), data.Key)
 	require.NoError(t, err)
 	require.NotEmpty(t, res)
-	require.Equal(t, res.Hits.Int32, 1)
+	require.Equal(t, res.Hits.Int32, int32(1))
 }

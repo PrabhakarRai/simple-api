@@ -112,7 +112,7 @@ func TestUpdateStorageDownload(t *testing.T) {
 	res, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
 	require.NoError(t, err)
 	require.NotEmpty(t, res)
-	require.Equal(t, res.Downloads.Int32, 1)
+	require.Equal(t, res.Downloads.Int32, int32(1))
 }
 
 func TestUpdateStorageErrors(t *testing.T) {
@@ -122,7 +122,7 @@ func TestUpdateStorageErrors(t *testing.T) {
 	res, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
 	require.NoError(t, err)
 	require.NotEmpty(t, res)
-	require.Equal(t, res.Errors.Int32, 1)
+	require.Equal(t, res.Errors.Int32, int32(1))
 }
 
 func TestUpdateStorageValue(t *testing.T) {

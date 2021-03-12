@@ -66,7 +66,7 @@ func TestUpdateUserName(t *testing.T) {
 	}
 	err = testQueries.UpdateUserName(context.Background(), arg)
 	require.NoError(t, err)
-	newusr, err := testQueries.GetUserByUsername(context.Background(), arg.Name)
+	newusr, err := testQueries.GetUserByID(context.Background(), arg.ID)
 	require.NoError(t, err)
 	require.NotEqual(t, newusr.Name, usr.Name)
 	require.Equal(t, newusr.ID, usr.ID)
