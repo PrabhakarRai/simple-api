@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/PrabhakarRai/simple-api/utils"
@@ -70,4 +71,69 @@ func TestDeleteStorageItemsByUserID(t *testing.T) {
 	require.NoError(t, err)
 	result, err := testQueries.GetStorageItemsByUserID(context.Background(), data.CreatedBy)
 	require.Empty(t, result)
+}
+
+func TestUpdateStorageAvailable(t *testing.T) {
+	data := createRandomStorageItem(t)
+	arg := UpdateStorageAvailableParams{
+		Key: data.Key,
+		Available: sql.NullBool{
+			Bool:  false,
+			Valid: true,
+		},
+	}
+
+	err := testQueries.UpdateStorageAvailable(context.Background(), arg)
+	require.NoError(t, err)
+	result, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
+	require.Equal(t, result.Available.Bool, false)
+}
+
+func TestUpdateStorageAvailableByUserID(t *testing.T) {
+	data := createRandomStorageItem(t)
+	arg := UpdateStorageAvailableByUserIDParams{
+		CreatedBy: data.CreatedBy,
+		Available: sql.NullBool{
+			Bool:  false,
+			Valid: true,
+		},
+	}
+
+	err := testQueries.UpdateStorageAvailableByUserID(context.Background(), arg)
+	require.NoError(t, err)
+	result, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
+	require.Equal(t, result.Available.Bool, false)
+}
+
+func TestUpdateStorageDownload(t *testing.T) {
+	data := createRandomStorageItem(t)
+	err := testQueries.UpdateStorageDownload(context.Background(), data.Key)
+	require.NoError(t, err)
+	res, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
+	require.NoError(t, err)
+	require.NotEmpty(t, res)
+	require.Equal(t, res.Downloads.Int32, 1)
+}
+
+func TestUpdateStorageErrors(t *testing.T) {
+	data := createRandomStorageItem(t)
+	err := testQueries.UpdateStorageErrors(context.Background(), data.Key)
+	require.NoError(t, err)
+	res, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
+	require.NoError(t, err)
+	require.NotEmpty(t, res)
+	require.Equal(t, res.Errors.Int32, 1)
+}
+
+func TestUpdateStorageValue(t *testing.T) {
+	data := createRandomStorageItem(t)
+	arg := UpdateStorageValueParams{
+		Key:   data.Key,
+		Value: utils.RandomValue(),
+	}
+	err := testQueries.UpdateStorageValue(context.Background(), arg)
+	require.NoError(t, err)
+	res, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
+	require.NoError(t, err)
+	require.Equal(t, res.Value, arg.Value)
 }

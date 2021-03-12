@@ -12,5 +12,5 @@ WHERE id = $1 LIMIT 1;
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;
 
--- name: UpdateUsername :exec
+-- name: UpdateUserName :exec
 UPDATE users SET name = $2 WHERE id = $1;

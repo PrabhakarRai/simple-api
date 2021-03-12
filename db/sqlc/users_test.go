@@ -33,6 +33,7 @@ func TestGetUserByID(t *testing.T) {
 	require.NotEmpty(t, usr.ID)
 	require.NotEmpty(t, usr.Name)
 	require.NotEmpty(t, usr.Username)
+	require.Equal(t, usr.ID, id)
 }
 
 func TestGetUserByUsername(t *testing.T) {
@@ -40,6 +41,7 @@ func TestGetUserByUsername(t *testing.T) {
 	usr, err := testQueries.GetUserByID(context.Background(), id)
 	require.NoError(t, err)
 	require.NotEmpty(t, usr)
+	require.Equal(t, usr.ID, id)
 	usr2, err := testQueries.GetUserByUsername(context.Background(), usr.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, usr2)
@@ -53,4 +55,19 @@ func TestDeleteUser(t *testing.T) {
 	id := createRandomUser(t)
 	err := testQueries.DeleteUser(context.Background(), id)
 	require.NoError(t, err)
+}
+
+func TestUpdateUserName(t *testing.T) {
+	id := createRandomUser(t)
+	usr, err := testQueries.GetUserByID(context.Background(), id)
+	arg := UpdateUsernameParams{
+		ID:   id,
+		Name: utils.RandomName(),
+	}
+	err = testQueries.UpdateUsername(context.Background(), arg)
+	require.NoError(t, err)
+	newusr, err := testQueries.GetUserByUsername(context.Background(), arg.Name)
+	require.NoError(t, err)
+	require.NotEqual(t, newusr.Name, usr.Name)
+	require.Equal(t, newusr.ID, usr.ID)
 }
