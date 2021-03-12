@@ -60,11 +60,11 @@ func TestDeleteUser(t *testing.T) {
 func TestUpdateUserName(t *testing.T) {
 	id := createRandomUser(t)
 	usr, err := testQueries.GetUserByID(context.Background(), id)
-	arg := UpdateUsernameParams{
+	arg := UpdateUserNameParams{
 		ID:   id,
 		Name: utils.RandomName(),
 	}
-	err = testQueries.UpdateUsername(context.Background(), arg)
+	err = testQueries.UpdateUserName(context.Background(), arg)
 	require.NoError(t, err)
 	newusr, err := testQueries.GetUserByUsername(context.Background(), arg.Name)
 	require.NoError(t, err)
