@@ -34,7 +34,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 
 const getUserByID = `-- name: GetUserByID :one
 SELECT id, username, name FROM users
-WHERE id = $1
+WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
@@ -46,7 +46,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
 
 const getUserByUsername = `-- name: GetUserByUsername :one
 SELECT id, username, name FROM users
-WHERE username = $1
+WHERE username = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
@@ -54,4 +54,18 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	var i User
 	err := row.Scan(&i.ID, &i.Username, &i.Name)
 	return i, err
+}
+
+const updateUsername = `-- name: UpdateUsername :exec
+UPDATE users SET name = $2 WHERE id = $1
+`
+
+type UpdateUsernameParams struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
+}
+
+func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) error {
+	_, err := q.db.ExecContext(ctx, updateUsername, arg.ID, arg.Name)
+	return err
 }

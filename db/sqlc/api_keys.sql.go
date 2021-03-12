@@ -5,10 +5,11 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createAPIKey = `-- name: CreateAPIKey :one
-INSERT INTO api_keys (key, owner) VALUES ($1, $2) RETURNING id
+INSERT INTO api_keys (key, owner) VALUES ($1, $2) RETURNING id, key, owner
 `
 
 type CreateAPIKeyParams struct {
@@ -16,11 +17,17 @@ type CreateAPIKeyParams struct {
 	Owner int32  `json:"owner"`
 }
 
-func (q *Queries) CreateAPIKey(ctx context.Context, arg CreateAPIKeyParams) (int32, error) {
+type CreateAPIKeyRow struct {
+	ID    int32  `json:"id"`
+	Key   string `json:"key"`
+	Owner int32  `json:"owner"`
+}
+
+func (q *Queries) CreateAPIKey(ctx context.Context, arg CreateAPIKeyParams) (CreateAPIKeyRow, error) {
 	row := q.db.QueryRowContext(ctx, createAPIKey, arg.Key, arg.Owner)
-	var id int32
-	err := row.Scan(&id)
-	return id, err
+	var i CreateAPIKeyRow
+	err := row.Scan(&i.ID, &i.Key, &i.Owner)
+	return i, err
 }
 
 const deleteAPIKeyByAPIKey = `-- name: DeleteAPIKeyByAPIKey :exec
@@ -42,7 +49,7 @@ func (q *Queries) DeleteAPIKeysByUserID(ctx context.Context, owner int32) error 
 }
 
 const deleteAPIKeysByUsername = `-- name: DeleteAPIKeysByUsername :exec
-DELETE FROM api_keys WHERE api_keys.owner = (SELECT id FROM users WHERE users.username = $1 LIMIT 1)
+DELETE FROM api_keys WHERE api_keys.owner = (SELECT id FROM users WHERE users.username = $1)
 `
 
 func (q *Queries) DeleteAPIKeysByUsername(ctx context.Context, username string) error {
@@ -50,13 +57,13 @@ func (q *Queries) DeleteAPIKeysByUsername(ctx context.Context, username string) 
 	return err
 }
 
-const getAPIKeyByUserID = `-- name: GetAPIKeyByUserID :one
+const getAPIKeyDetailsByKey = `-- name: GetAPIKeyDetailsByKey :one
 SELECT id, key, owner, enabled, hits, errors FROM api_keys
-WHERE api_keys.owner = $1
+WHERE key = $1 LIMIT 1
 `
 
-func (q *Queries) GetAPIKeyByUserID(ctx context.Context, owner int32) (ApiKey, error) {
-	row := q.db.QueryRowContext(ctx, getAPIKeyByUserID, owner)
+func (q *Queries) GetAPIKeyDetailsByKey(ctx context.Context, key string) (ApiKey, error) {
+	row := q.db.QueryRowContext(ctx, getAPIKeyDetailsByKey, key)
 	var i ApiKey
 	err := row.Scan(
 		&i.ID,
@@ -69,40 +76,104 @@ func (q *Queries) GetAPIKeyByUserID(ctx context.Context, owner int32) (ApiKey, e
 	return i, err
 }
 
-const getAPIKeyByUsername = `-- name: GetAPIKeyByUsername :one
+const getAPIKeysByOwner = `-- name: GetAPIKeysByOwner :many
+SELECT id, key, owner, enabled, hits, errors FROM api_keys
+WHERE owner = $1
+`
+
+func (q *Queries) GetAPIKeysByOwner(ctx context.Context, owner int32) ([]ApiKey, error) {
+	rows, err := q.db.QueryContext(ctx, getAPIKeysByOwner, owner)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ApiKey{}
+	for rows.Next() {
+		var i ApiKey
+		if err := rows.Scan(
+			&i.ID,
+			&i.Key,
+			&i.Owner,
+			&i.Enabled,
+			&i.Hits,
+			&i.Errors,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAPIKeysByUsername = `-- name: GetAPIKeysByUsername :many
 SELECT id, key, owner, enabled, hits, errors FROM api_keys
 WHERE api_keys.owner = (SELECT id FROM users WHERE users.username = $1 LIMIT 1)
 `
 
-func (q *Queries) GetAPIKeyByUsername(ctx context.Context, username string) (ApiKey, error) {
-	row := q.db.QueryRowContext(ctx, getAPIKeyByUsername, username)
-	var i ApiKey
-	err := row.Scan(
-		&i.ID,
-		&i.Key,
-		&i.Owner,
-		&i.Enabled,
-		&i.Hits,
-		&i.Errors,
-	)
-	return i, err
+func (q *Queries) GetAPIKeysByUsername(ctx context.Context, username string) ([]ApiKey, error) {
+	rows, err := q.db.QueryContext(ctx, getAPIKeysByUsername, username)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ApiKey{}
+	for rows.Next() {
+		var i ApiKey
+		if err := rows.Scan(
+			&i.ID,
+			&i.Key,
+			&i.Owner,
+			&i.Enabled,
+			&i.Hits,
+			&i.Errors,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
-const getUserIDByAPIKey = `-- name: GetUserIDByAPIKey :one
-SELECT id, key, owner, enabled, hits, errors FROM api_keys
-WHERE owner = $1 LIMIT 1
+const updateAPIKeyEnabled = `-- name: UpdateAPIKeyEnabled :exec
+UPDATE api_keys SET enabled = $2 WHERE key = $1
 `
 
-func (q *Queries) GetUserIDByAPIKey(ctx context.Context, owner int32) (ApiKey, error) {
-	row := q.db.QueryRowContext(ctx, getUserIDByAPIKey, owner)
-	var i ApiKey
-	err := row.Scan(
-		&i.ID,
-		&i.Key,
-		&i.Owner,
-		&i.Enabled,
-		&i.Hits,
-		&i.Errors,
-	)
-	return i, err
+type UpdateAPIKeyEnabledParams struct {
+	Key     string       `json:"key"`
+	Enabled sql.NullBool `json:"enabled"`
+}
+
+func (q *Queries) UpdateAPIKeyEnabled(ctx context.Context, arg UpdateAPIKeyEnabledParams) error {
+	_, err := q.db.ExecContext(ctx, updateAPIKeyEnabled, arg.Key, arg.Enabled)
+	return err
+}
+
+const updateAPIKeyErrors = `-- name: UpdateAPIKeyErrors :exec
+UPDATE api_keys SET errors = errors+1 WHERE key = $1
+`
+
+func (q *Queries) UpdateAPIKeyErrors(ctx context.Context, key string) error {
+	_, err := q.db.ExecContext(ctx, updateAPIKeyErrors, key)
+	return err
+}
+
+const updateAPIKeyHits = `-- name: UpdateAPIKeyHits :exec
+UPDATE api_keys SET hits = hits+1 WHERE key = $1
+`
+
+func (q *Queries) UpdateAPIKeyHits(ctx context.Context, key string) error {
+	_, err := q.db.ExecContext(ctx, updateAPIKeyHits, key)
+	return err
 }

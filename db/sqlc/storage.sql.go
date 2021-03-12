@@ -5,6 +5,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createStorageItem = `-- name: CreateStorageItem :one
@@ -122,4 +123,64 @@ func (q *Queries) GetStorageItemsByUsername(ctx context.Context, username string
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateStorageAvailable = `-- name: UpdateStorageAvailable :exec
+UPDATE storage SET available = $2 WHERE key = $1
+`
+
+type UpdateStorageAvailableParams struct {
+	Key       string       `json:"key"`
+	Available sql.NullBool `json:"available"`
+}
+
+func (q *Queries) UpdateStorageAvailable(ctx context.Context, arg UpdateStorageAvailableParams) error {
+	_, err := q.db.ExecContext(ctx, updateStorageAvailable, arg.Key, arg.Available)
+	return err
+}
+
+const updateStorageAvailableByUserID = `-- name: UpdateStorageAvailableByUserID :exec
+UPDATE storage SET available = $2 WHERE created_by = $1
+`
+
+type UpdateStorageAvailableByUserIDParams struct {
+	CreatedBy int32        `json:"created_by"`
+	Available sql.NullBool `json:"available"`
+}
+
+func (q *Queries) UpdateStorageAvailableByUserID(ctx context.Context, arg UpdateStorageAvailableByUserIDParams) error {
+	_, err := q.db.ExecContext(ctx, updateStorageAvailableByUserID, arg.CreatedBy, arg.Available)
+	return err
+}
+
+const updateStorageDownload = `-- name: UpdateStorageDownload :exec
+UPDATE storage SET downloads = downloads+1 WHERE key = $1
+`
+
+func (q *Queries) UpdateStorageDownload(ctx context.Context, key string) error {
+	_, err := q.db.ExecContext(ctx, updateStorageDownload, key)
+	return err
+}
+
+const updateStorageErrors = `-- name: UpdateStorageErrors :exec
+UPDATE storage SET errors = errors+1 WHERE key = $1
+`
+
+func (q *Queries) UpdateStorageErrors(ctx context.Context, key string) error {
+	_, err := q.db.ExecContext(ctx, updateStorageErrors, key)
+	return err
+}
+
+const updateStorageValue = `-- name: UpdateStorageValue :exec
+UPDATE storage SET value = $2 WHERE key = $1
+`
+
+type UpdateStorageValueParams struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+func (q *Queries) UpdateStorageValue(ctx context.Context, arg UpdateStorageValueParams) error {
+	_, err := q.db.ExecContext(ctx, updateStorageValue, arg.Key, arg.Value)
+	return err
 }
