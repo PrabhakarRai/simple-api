@@ -56,16 +56,16 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	return i, err
 }
 
-const updateUsername = `-- name: UpdateUsername :exec
+const updateUserName = `-- name: UpdateUserName :exec
 UPDATE users SET name = $2 WHERE id = $1
 `
 
-type UpdateUsernameParams struct {
+type UpdateUserNameParams struct {
 	ID   int32  `json:"id"`
 	Name string `json:"name"`
 }
 
-func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) error {
-	_, err := q.db.ExecContext(ctx, updateUsername, arg.ID, arg.Name)
+func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserName, arg.ID, arg.Name)
 	return err
 }
