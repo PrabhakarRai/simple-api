@@ -57,8 +57,8 @@ func TestGetAPIKeyDetailsByKey(t *testing.T) {
 	require.Equal(t, res.Key, data.Key)
 	require.Equal(t, res.Owner, data.Owner)
 	require.Equal(t, res.Enabled.Bool, true)
-	require.Equal(t, res.Hits, 0)
-	require.Equal(t, res.Errors, 0)
+	require.Equal(t, res.Hits.Int32, int32(0))
+	require.Equal(t, res.Errors.Int32, int32(0))
 }
 
 func TestGetAPIKeysByOwner(t *testing.T) {
