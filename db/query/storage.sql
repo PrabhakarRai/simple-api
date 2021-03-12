@@ -18,3 +18,18 @@ DELETE FROM storage WHERE key = $1;
 
 -- name: DeleteStorageItemsByUserID :exec
 DELETE FROM storage WHERE created_by = $1;
+
+-- name: UpdateStorageValue :exec
+UPDATE storage SET value = $2 WHERE key = $1;
+
+-- name: UpdateStorageDownload :exec
+UPDATE storage SET downloads = downloads+1 WHERE key = $1;
+
+-- name: UpdateStorageErrors :exec
+UPDATE storage SET errors = errors+1 WHERE key = $1;
+
+-- name: UpdateStorageAvailable :exec
+UPDATE storage SET available = $2 WHERE key = $1;
+
+-- name: UpdateStorageAvailableByUserID :exec
+UPDATE storage SET available = $2 WHERE created_by = $1;
