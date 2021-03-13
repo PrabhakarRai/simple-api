@@ -25,7 +25,7 @@ CREATE TABLE "storage" (
 
 ALTER TABLE "api_keys" ADD FOREIGN KEY ("owner") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-ALTER TABLE "storage" ADD FOREIGN KEY ("by") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE "storage" ADD FOREIGN KEY ("created_by") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 CREATE INDEX "user name" ON "users" ("username");
 
@@ -37,7 +37,7 @@ CREATE INDEX "key owner" ON "api_keys" ("owner");
 
 CREATE INDEX "by key" ON "storage" ("key");
 
-CREATE INDEX "by creator" ON "storage" ("by");
+CREATE INDEX "by creator" ON "storage" ("created_by");
 
 COMMENT ON COLUMN "users"."username" IS 'username';
 
