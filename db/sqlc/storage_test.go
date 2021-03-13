@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/PrabhakarRai/simple-api/utils"
@@ -71,38 +70,33 @@ func TestDeleteStorageItemsByUserID(t *testing.T) {
 	require.NoError(t, err)
 	result, err := testQueries.GetStorageItemsByUserID(context.Background(), data.CreatedBy)
 	require.Empty(t, result)
+	require.NoError(t, err)
 }
 
 func TestUpdateStorageAvailable(t *testing.T) {
 	data := createRandomStorageItem(t)
 	arg := UpdateStorageAvailableParams{
-		Key: data.Key,
-		Available: sql.NullBool{
-			Bool:  false,
-			Valid: true,
-		},
+		Key:       data.Key,
+		Available: false,
 	}
 
 	err := testQueries.UpdateStorageAvailable(context.Background(), arg)
 	require.NoError(t, err)
-	result, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
-	require.Equal(t, result.Available.Bool, false)
+	result, _ := testQueries.GetStorageItemByKey(context.Background(), data.Key)
+	require.Equal(t, result.Available, false)
 }
 
 func TestUpdateStorageAvailableByUserID(t *testing.T) {
 	data := createRandomStorageItem(t)
 	arg := UpdateStorageAvailableByUserIDParams{
 		CreatedBy: data.CreatedBy,
-		Available: sql.NullBool{
-			Bool:  false,
-			Valid: true,
-		},
+		Available: false,
 	}
 
 	err := testQueries.UpdateStorageAvailableByUserID(context.Background(), arg)
 	require.NoError(t, err)
-	result, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
-	require.Equal(t, result.Available.Bool, false)
+	result, _ := testQueries.GetStorageItemByKey(context.Background(), data.Key)
+	require.Equal(t, result.Available, false)
 }
 
 func TestUpdateStorageDownload(t *testing.T) {
@@ -112,7 +106,7 @@ func TestUpdateStorageDownload(t *testing.T) {
 	res, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
 	require.NoError(t, err)
 	require.NotEmpty(t, res)
-	require.Equal(t, res.Downloads.Int32, int32(1))
+	require.Equal(t, res.Downloads, int32(1))
 }
 
 func TestUpdateStorageErrors(t *testing.T) {
@@ -122,7 +116,7 @@ func TestUpdateStorageErrors(t *testing.T) {
 	res, err := testQueries.GetStorageItemByKey(context.Background(), data.Key)
 	require.NoError(t, err)
 	require.NotEmpty(t, res)
-	require.Equal(t, res.Errors.Int32, int32(1))
+	require.Equal(t, res.Errors, int32(1))
 }
 
 func TestUpdateStorageValue(t *testing.T) {

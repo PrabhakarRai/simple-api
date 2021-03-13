@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/PrabhakarRai/simple-api/utils"
@@ -56,9 +55,9 @@ func TestGetAPIKeyDetailsByKey(t *testing.T) {
 	require.Equal(t, res.ID, data.ID)
 	require.Equal(t, res.Key, data.Key)
 	require.Equal(t, res.Owner, data.Owner)
-	require.Equal(t, res.Enabled.Bool, true)
-	require.Equal(t, res.Hits.Int32, int32(0))
-	require.Equal(t, res.Errors.Int32, int32(0))
+	require.Equal(t, res.Enabled, true)
+	require.Equal(t, res.Hits, int32(0))
+	require.Equal(t, res.Errors, int32(0))
 }
 
 func TestGetAPIKeysByOwner(t *testing.T) {
@@ -70,7 +69,7 @@ func TestGetAPIKeysByOwner(t *testing.T) {
 
 func TestGetAPIKeysByUsername(t *testing.T) {
 	data := createRandomAPIKey(t)
-	usr, err := testQueries.GetUserByID(context.Background(), data.Owner)
+	usr, _ := testQueries.GetUserByID(context.Background(), data.Owner)
 	res, err := testQueries.GetAPIKeysByUsername(context.Background(), usr.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, res)
@@ -79,11 +78,8 @@ func TestGetAPIKeysByUsername(t *testing.T) {
 func TestUpdateAPIKeyEnabled(t *testing.T) {
 	data := createRandomAPIKey(t)
 	arg := UpdateAPIKeyEnabledParams{
-		Key: data.Key,
-		Enabled: sql.NullBool{
-			Bool:  false,
-			Valid: true,
-		},
+		Key:     data.Key,
+		Enabled: false,
 	}
 	err := testQueries.UpdateAPIKeyEnabled(context.Background(), arg)
 	require.NoError(t, err)
@@ -96,7 +92,7 @@ func TestUpdateAPIKeyErrors(t *testing.T) {
 	res, err := testQueries.GetAPIKeyDetailsByKey(context.Background(), data.Key)
 	require.NoError(t, err)
 	require.NotEmpty(t, res)
-	require.Equal(t, res.Errors.Int32, int32(1))
+	require.Equal(t, res.Errors, int32(1))
 }
 
 func TestUpdateAPIKeyHits(t *testing.T) {
@@ -106,5 +102,5 @@ func TestUpdateAPIKeyHits(t *testing.T) {
 	res, err := testQueries.GetAPIKeyDetailsByKey(context.Background(), data.Key)
 	require.NoError(t, err)
 	require.NotEmpty(t, res)
-	require.Equal(t, res.Hits.Int32, int32(1))
+	require.Equal(t, res.Hits, int32(1))
 }
