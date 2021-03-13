@@ -5,7 +5,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createAPIKey = `-- name: CreateAPIKey :one
@@ -151,8 +150,8 @@ UPDATE api_keys SET enabled = $2 WHERE key = $1
 `
 
 type UpdateAPIKeyEnabledParams struct {
-	Key     string       `json:"key"`
-	Enabled sql.NullBool `json:"enabled"`
+	Key     string `json:"key"`
+	Enabled bool   `json:"enabled"`
 }
 
 func (q *Queries) UpdateAPIKeyEnabled(ctx context.Context, arg UpdateAPIKeyEnabledParams) error {

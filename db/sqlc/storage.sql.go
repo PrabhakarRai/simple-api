@@ -5,7 +5,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createStorageItem = `-- name: CreateStorageItem :one
@@ -130,8 +129,8 @@ UPDATE storage SET available = $2 WHERE key = $1
 `
 
 type UpdateStorageAvailableParams struct {
-	Key       string       `json:"key"`
-	Available sql.NullBool `json:"available"`
+	Key       string `json:"key"`
+	Available bool   `json:"available"`
 }
 
 func (q *Queries) UpdateStorageAvailable(ctx context.Context, arg UpdateStorageAvailableParams) error {
@@ -144,8 +143,8 @@ UPDATE storage SET available = $2 WHERE created_by = $1
 `
 
 type UpdateStorageAvailableByUserIDParams struct {
-	CreatedBy int32        `json:"created_by"`
-	Available sql.NullBool `json:"available"`
+	CreatedBy int32 `json:"created_by"`
+	Available bool  `json:"available"`
 }
 
 func (q *Queries) UpdateStorageAvailableByUserID(ctx context.Context, arg UpdateStorageAvailableByUserIDParams) error {

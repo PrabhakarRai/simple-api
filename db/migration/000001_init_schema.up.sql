@@ -18,7 +18,7 @@ CREATE TABLE "storage" (
   "key" varchar(32) UNIQUE NOT NULL,
   "value" varchar NOT NULL DEFAULT 'empty',
   "available" boolean NOT NULL DEFAULT 'true',
-  "by" int NOT NULL,
+  "created_by" int NOT NULL,
   "downloads" int NOT NULL DEFAULT 0,
   "errors" int NOT NULL DEFAULT 0
 );
